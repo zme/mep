@@ -16,27 +16,9 @@ class Test extends AppModel
      * @var array
      */
     public $validate = array(
-                        'name' => array(
-                                   'allowEmpty' => false,
-                                   'message'    => 'Candidate must be selected.',
-                                  ),
-                        'topic_id'   => array(
-                                           'rule'       => array('numeric'),
-                                           'allowEmpty' => false,
-                                           'message'    => 'Topic must be selected.',
-                                          ),
-                        'code'         => array('rule' => array('notempty')),
+                        'name' => array('rule' => array('notempty')),                        
+                        'code' => array('rule' => array('notempty')),
                        );
-
-
-    /**
-     * This class variable contains list of model's belongsTo associations.
-     *
-     * @var array
-     */
-    public $belongsTo = array(
-                         'Topic',
-                        );
 
 
     /**
@@ -44,7 +26,7 @@ class Test extends AppModel
      *
      * @var array
      */
-    public $hasMany = array('TestQuestion');
+    public $hasAndBelongsToMany = array('Question');    
 
 
     /**

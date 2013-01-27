@@ -93,17 +93,15 @@ class TestsController extends AppController
                  'conditions' => array('Test.id' => $id),
                 )
             );
-            $test['question_count']   = count($test['TestQuestion']);
+            $test['question_count']   = count($test['QuestionTest']);
             $test['current_question'] = 0;
             $this->Session->write('Test', $test);
         }
         
         $test            = $this->Session->read('Test');
-        $currentQuestion = $test['TestQuestion'][$test['current_question']]['question_id'];
-        unset($test['TestQuestion']);
+        $currentQuestion = $test['QuestionTest'][$test['current_question']]['question_id'];
+        unset($test['QuestionTest']);
         $question = $this->Question->read(null, $currentQuestion);
-        //debug($question);
-        //debug($test);
         $this->set(compact('test', 'question'));
     }//end view()
 
@@ -116,23 +114,24 @@ class TestsController extends AppController
     {
         // If the form was submitted, proceeds to save the form.
         if ($this->request->is('post')) {
-
+            $topics = array_filter(array_unique($this->request->data['Test']['topic_id']));
+            $this->request->data['Test']['topic_id'] = $topics;
             // Gets random questions
             $questions = $this->Question->find(
                 'list',
                 array(
-                 'conditions' => array('Question.topic_id' => $this->request->data['Test']['topic_id']),
+                 'conditions' => array('Question.topic_id' => $topics),
                  'order'      => 'RAND()',
                  'limit'      => $this->request->data['Test']['number_of_questions'],
-                 'fields'     => array('Question.id', 'Question.topic_id')
+                 'fields'     => array('Question.id')
                 )
             );
             // Modifies data to be saved as associated models.
-            $modifiedRequestData = $this->Test->modifyTestData($this->request->data, $questions);
-            
+            $this->request->data['Question']['Question'] = $questions;
+
             // Saves associated data.
             $this->Test->create();
-            if ($this->Test->saveAssociated($modifiedRequestData)) {
+            if ($this->Test->save($this->request->data)) {
                 $this->Session->setFlash(
                     __('The test has been saved'),
                     'success',
@@ -310,8 +309,8 @@ class TestsController extends AppController
         if ($this->request->is('post')) {
 
             // should get id on pressing next prev or submit button
-            if (isset($this->request->data['TestQuestion']['test_id'])) {
-                $testId = $this->request->data['TestQuestion']['test_id'];
+            if (isset($this->request->data['QuestionTest']['test_id'])) {
+                $testId = $this->request->data['QuestionTest']['test_id'];
             } else {
                 $testId = $this->__validateTestWithCode();
             }
@@ -473,19 +472,19 @@ class TestsController extends AppController
             'first',
             array(
              'fields'     => array('Test.id'),
-             'contain'    => array('TestQuestion' => array('order' => array('TestQuestion.id' => 'asc'))),
+             'contain'    => array('QuestionTest' => array('order' => array('TestQuestion.id' => 'asc'))),
              'conditions' => array('Test.id' => $testId),
             )
         );
 
-        $response          = $questions['TestQuestion'][$index-1];
+        $response          = $questions['QuestionTest'][$index-1];
         $response['index'] = $index;
 
         if ($index <= 1) {
             $response['prev']   = false;
             $response['next']   = true;
             $response['submit'] = false;
-        } else if ($index >= (int)(count($questions['TestQuestion']))) {
+        } else if ($index >= (int)(count($questions['QuestionTest']))) {
             $response['prev']   = true;
             $response['next']   = false;
             $response['submit'] = true;
@@ -644,7 +643,7 @@ class TestsController extends AppController
                  'conditions' => array('Test.id' => $id),
                 )
             );            
-            $test['question_count'] = count($test['TestQuestion']);
+            $test['question_count'] = count($test['QuestionTest']);
             $test['current_question'] = 0;
             $this->Session->write('Test', $test);
             $this->Session->write('Test.timeRemaining', date('s') + 3600);
@@ -654,8 +653,8 @@ class TestsController extends AppController
      
 
 
-        $currentQuestion = $test['TestQuestion'][$test['current_question']]['question_id'];
-        unset($test['TestQuestion']);
+        $currentQuestion = $test['QuestionTest'][$test['current_question']]['question_id'];
+        unset($test['QuestionTest']);
         $question = $this->Question->read(null, $currentQuestion);
         
         $this->request->data = '';

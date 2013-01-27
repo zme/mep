@@ -12,15 +12,14 @@
 					<tr>
 						<th><?php echo $this->Paginator->sort('id');?></th>
 						<th><?php echo $this->Paginator->sort('Name');?></th>
-						<th><?php echo $this->Paginator->sort('code');?></th>
 						<th class="actions"><?php echo __('Actions');?></th>
 					</tr>
 					<?php foreach ($tests as $test): ?>
 					<tr>		
 						<td><?php echo h($test['Test']['id']); ?>&nbsp;</td>
 						<td><?php echo h($test['Test']['name']); ?>&nbsp;</td>
-						<td><?php echo h($test['Test']['code']); ?>&nbsp;</td>
-						<td class="actions">						
+						<td class="actions span2">
+							<?php echo $this->Html->link(__('Preview'), array('action' => 'preview', $test['Test']['id']), array('class' => 'btn btn-mini btn-info')); ?>
 							<?php echo $this->Form->postLink(__('Delete'), array('action' => 'delete', $test['Test']['id']),  array('class' => 'btn btn-danger btn-mini'), __('Are you sure you want to delete # %s?', $test['Test']['id'])); ?>
 						</td>
 					</tr>

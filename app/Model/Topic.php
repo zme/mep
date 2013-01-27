@@ -24,7 +24,6 @@ class Topic extends AppModel {
      * @var array
      */
     public $hasMany = array(
-                       //0          => 'Test',
                        'Question' => array('dependent' => true),
                       );
 

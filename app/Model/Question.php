@@ -26,6 +26,8 @@ class Question extends AppModel
 
     public $hasMany = array('Image');
 
+    public $hasAndBelongsToMany = array('Test');
+
     function beforeValidate()
     {      
         if (!empty($this->data['Question']['answer'])) {
