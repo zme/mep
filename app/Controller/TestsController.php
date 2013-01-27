@@ -35,6 +35,11 @@ class TestsController extends AppController
         
     }
 
+    public function admin_preview($id = null)
+    {
+        
+    }
+
 
     public function admin_dashboard()
     {

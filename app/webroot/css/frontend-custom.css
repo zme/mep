@@ -34,3 +34,8 @@ form .text-error {
 .brand i {
 	margin-top: 4px;
 }
+
+.answerbtn {
+    width: 25px;
+    margin: 3px;
+}
