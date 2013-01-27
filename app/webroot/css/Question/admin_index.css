@@ -1,0 +1,6 @@
+.dl-horizontal dt {
+    width: inherit;
+}
+.dl-horizontal dd {
+    margin-left: 20px;
+}
