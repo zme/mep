@@ -1,35 +1,44 @@
 <?php 
 echo $this->Html->script(array('underscore-min', 'backbone-min', 'admin_preview'), array('inline' => false));
  ?>
+<script type="text/template" id="topicTemplate">
+    <a href="#" class="btn btn-primary"><%= title %></a>
+</script>
+<script type="text/template" id="questionTemplate">
+    <h4>Question No. <%= id %></h4>
+    <div class="question-title"><%= title %></div>
+    <ul class="unstyled options-container">
+        <li><input type="radio"><%= option_1 %></li>
+        <li><input type="radio"><%= option_2 %></li>
+        <li><input type="radio"><%= option_3 %></li>
+        <li><input type="radio"><%= option_4 %></li>
+        <li><input type="radio"><%= option_5 %></li>
+    </ul>
+    <div>
+        <div class="pull-left">
+            <a class="btn btn-info mark-question" href="#">Mark for Review and Next</a>
+            <a class="btn btn-info clean-question" href="#">Clear Response</a>
+        </div>
+        <div class="pull-right">
+            <a class="btn btn-primary save-question" href="#">Save and Next</a>
+        </div>
+    </div>
+</script>
+<div class="topic-data hide">
+    <ul class="unstyled">
+        <li><a href="#" class="btn btn-info btn-mini">Question Paper</a></li>
+        <li><a href="#" class="btn btn-info btn-mini">Instructions</a></li>
+        <li><a href="#" class="btn btn-info btn-mini">Profile</a></li>
+        <li><a href="#" class="btn btn-info btn-mini disabled">Submit</a></li>
+    </ul>
+</div>
 <div class="row">
     <div class="span9">
-        <h4><?php echo __('Sections'); ?></h4>
-        <a href="#" class="btn btn-primary"><?php echo __('Computer Awareness'); ?></a>
+        <h4 class="section-heading"><?php echo __('Sections'); ?></h4>
+        <div id="sections"></div>
         <hr />
-        <div class="clearfix">
-            <select name="language" id="language" class="span2 pull-right">
-                <option value="english">English</option>
-            </select>
-            <h4>Question No. 1</h4>
+        <div id="questions">               
         </div>
-        <div class="clearfix">
-            This is dummy question, dummy question dummy question. This is dummy question, dummy question dummy question. This is dummy question, dummy question dummy question.
-        </div>
-        <ul class="unstyled">
-            <li><input type="radio"> Option 1</li>
-            <li><input type="radio"> Option 2</li>
-            <li><input type="radio"> Option 3</li>
-            <li><input type="radio"> Option 4</li>
-            <li><input type="radio"> Option 5</li>            
-        </ul>
-        <div>
-            <div class="pull-left">
-                <a class="btn btn-info" href="#">Mark for Review and Next</a>
-                <a class="btn btn-info" href="#">Clear Response</a>
-            </div>
-            <div class="pull-right"><a class="btn btn-primary" href="#">Save and Next</a></div>
-        </div>
-
     </div>
     <div class="span3">
         <div class="row">

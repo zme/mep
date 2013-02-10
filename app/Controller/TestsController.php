@@ -37,7 +37,7 @@ class TestsController extends AppController
 
     public function admin_preview($id = null)
     {
-        
+        $this->render('admin_preview_test');
     }
 
 
