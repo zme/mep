@@ -106,7 +106,7 @@
         setQuestion: function(model) {
             this.currentQuestion = model;
         }
-    });
+    });    
     App.Views.Questions = Backbone.View.extend({
         el: '#questions',        
         render: function() {
@@ -122,8 +122,8 @@
             this.collection.next();
             this.render();
         },
-        initialize: function() {            
-            this.setQuestion(this.collection.at(0));
+        initialize: function() {
+            this.setQuestion(this.collection.at(0));                
             this.collection.on('change:currentQuestion', this.render, this);
         },
         getQuestion: function() {
@@ -162,9 +162,65 @@
             option_5: 'first Option number 5'
         }
     ]);
+
     var questionsView = new App.Views.Questions({
         collection: questionsCollection
     });
     questionsView.render();
+
+
+    //
+    // QuestionButtons
+    //
+    App.Models.QuestionButton = Backbone.Model.extend({});
+    App.Views.QuestionButton = Backbone.View.extend({
+        tagName: 'span',
+        template: template('questionButtonTemplate'),        
+        initialize: function() {
+            //console.log(this.model.attributes);
+            this.model.on('change', this.render, this);
+        },        
+        render: function() {
+            var template = this.template(this.model.toJSON());
+            this.$el.html(template);
+            return this;
+        }
+    });
+    App.Collections.QuestionButtons = Backbone.Collection.extend({
+        model: App.Models.QuestionButton
+    });
+
+    App.Views.QuestionButtons = Backbone.View.extend({
+        el: '#question-buttons-container',        
+        render: function() {
+            this.collection.each(this.addOne, this);
+            return this;
+        },
+        addOne: function(questionButton) {
+            var questionButtonView = new App.Views.QuestionButton({model: questionButton});
+
+            this.$el.append( questionButtonView.render().el );
+        }
+    });
+    var questionButtonCollection = new App.Collections.QuestionButtons([
+        {
+            title: '111',
+            id: 1
+        },
+        {
+            title: '222',
+            id: 2
+        },
+        {
+            title: '333',
+            id: 3
+        }
+    ]);
+    var questionButtonsView = new App.Views.QuestionButtons({
+        collection: questionButtonCollection        
+    });
+    questionButtonsView.render();
+
+
 
 })();

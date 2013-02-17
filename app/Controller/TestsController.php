@@ -1,8 +1,6 @@
 <?php
-
 class TestsController extends AppController
 {
-
 
     /**
      * This class variable is used to list models used by this controller class.
@@ -16,6 +14,8 @@ class TestsController extends AppController
                     'Result'
                    );
 
+    public $components = array('RequestHandler');
+
 
     /**
      * This action method is used to display paginated list of tests.
@@ -25,10 +25,10 @@ class TestsController extends AppController
     public function admin_index()
     {
         $this->Test->recursive = 0;
-        $tests = $this->paginate();
-        $this->set(compact('tests'));
+        $tests                 = $this->paginate();
+        $_serialize            = array('tests');
+        $this->set(compact('tests', '_serialize'));
     }//end index()
-
     
     public function dashboard()
     {
@@ -37,6 +37,16 @@ class TestsController extends AppController
 
     public function admin_preview($id = null)
     {
+        // Get all questions grouped by section
+        $this->Test->id = $id;
+        $conditions = array("Question.id IN (SELECT question_id FROM questions_tests WHERE test_id='$id')");
+        $group = array('Question.subject_id');
+        $recursive = -1;
+        $questions  = $this->Test->Question->find(
+            'all',
+            compact('conditions', 'recursive')
+        );
+        //debug($questions);
         $this->render('admin_preview_test');
     }
 
@@ -723,6 +733,59 @@ class TestsController extends AppController
     function student_quiz() {
         $id = $this->Test->field('id', array('name' => 'quiz'));
         $this->setAction('student_test', $id);
+    }
+
+
+    public function submit($type = null)
+    {
+        // Check if test is valid
+        $success    = false;
+        $error      = false;
+        $message    = '';
+        $statusCode = 200;
+
+        if (empty($type) || !$this->request->isPost() || !$this->request->isAjax()) {
+            $error      = true;
+            //$statusCode = 405;
+            //$message    = 'Method Not Allowed';
+        }
+
+        if ($this->request->isPost() || $this->request->isAjax()) {
+            //debug($this->request->data);
+            $success = true;
+            $message = 'Okay, getting ajax request';
+        }
+
+        $responseData = compact('success', 'error', 'message', 'type');
+
+        $this->autoLayout = false;
+        $this->render(false);
+        return $this->_sendJson($responseData, $statusCode);
+    }
+
+
+    private function _sendJson($data, $statusCode = 200)
+    {
+        $this->response->type('json');
+        $this->response->statusCode($statusCode);
+        $this->response->body(json_encode($data));
+
+        return $this->response;
+    }
+
+    private function _startTest($testId = null)
+    {
+        // Set session variable to start the test
+    }
+
+    private function _getTestTopics($idOrSlug = null)
+    {
+        // Gets the list of topics
+    }
+
+    private function _saveTestQuestionAnswer($questionId, $answer)
+    {
+        // saves the answer in result
     }
 
 

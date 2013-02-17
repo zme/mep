@@ -1,5 +1,5 @@
 <?php 
-echo $this->Html->script(array('underscore-min', 'backbone-min', 'admin_preview'), array('inline' => false));
+echo $this->Html->script(array('underscore-min', 'backbone', 'admin_preview'), array('inline' => false));
  ?>
 <script type="text/template" id="topicTemplate">
     <a href="#" class="btn btn-primary"><%= title %></a>
@@ -23,6 +23,9 @@ echo $this->Html->script(array('underscore-min', 'backbone-min', 'admin_preview'
             <a class="btn btn-primary save-question" href="#">Save and Next</a>
         </div>
     </div>
+</script>
+<script id="questionButtonTemplate" type="text/template">
+    <a href="#" data-question-id="<%= title %>" class="btn answerbtn"><%= title %></a>
 </script>
 <div class="topic-data hide">
     <ul class="unstyled">
@@ -50,10 +53,7 @@ echo $this->Html->script(array('underscore-min', 'backbone-min', 'admin_preview'
         </div>
         <hr />
         <div class="row">
-            <div class="span3">
-                <?php for($i = 1; $i <= 30; $i++): ?>
-                <a href="#" class="btn answerbtn"><?php echo $i ?></a>
-                <?php endfor; ?>                
+            <div id="question-buttons-container" class="span3">                              
             </div>
         </div>
         <div class="legend">
