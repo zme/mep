@@ -35,7 +35,7 @@ echo $this->Html->script(array('underscore-min', 'backbone', 'admin_preview'), a
         <li><a href="#" class="btn btn-info btn-mini disabled">Submit</a></li>
     </ul>
 </div>
-<div class="row">
+<div class="row" id="app-container">
     <div class="span9">
         <h4 class="section-heading"><?php echo __('Sections'); ?></h4>
         <div id="sections"></div>

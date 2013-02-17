@@ -42,37 +42,15 @@
     });
     App.Views.Topics = Backbone.View.extend({
         el: '#sections',
-
         render: function() {
             this.collection.each(this.addOne, this);
-
             return this;
         },
-
         addOne: function(topic) {
             var topicView = new App.Views.Topic({model: topic});
-
             this.$el.append( topicView.render().el );
         }
-    });
-    var topicsCollection = new App.Collections.Topics([
-        {
-            title: 'Computer Awareness',
-            id: 1
-        },
-        {
-            title: 'English',
-            id: 2
-        },
-        {
-            title: 'General Awareness',
-            id: 3
-        }
-    ]);
-    var topicsView = new App.Views.Topics({
-        collection: topicsCollection
-    });
-    topicsView.render();
+    });   
     
 
     /**
@@ -133,40 +111,6 @@
             this.collection.currentQuestion = model;
         }
     });
-    var questionsCollection = new App.Collections.Questions([
-        {
-            id: 2,
-            title: 'This is the second question title',
-            option_1: 'socond que Option number 1',
-            option_2: 'socond que Option number 2',
-            option_3: 'socond que Option number 3',
-            option_4: 'socond que Option number 4',
-            option_5: 'socond que Option number 5'
-        },
-        {
-            id: 3,
-            title: 'This is the question title',
-            option_1: 'Third question Option number 1',
-            option_2: 'Third question Option number 2',
-            option_3: 'Third question Option number 3',
-            option_4: 'Third question Option number 4',
-            option_5: 'Third question Option number 5'
-        },
-        {
-            id: 1,
-            title: 'This is the question title',
-            option_1: 'first Option number 1',
-            option_2: 'first Option number 2',
-            option_3: 'first Option number 3',
-            option_4: 'first Option number 4',
-            option_5: 'first Option number 5'
-        }
-    ]);
-
-    var questionsView = new App.Views.Questions({
-        collection: questionsCollection
-    });
-    questionsView.render();
 
 
     //
@@ -189,7 +133,6 @@
     App.Collections.QuestionButtons = Backbone.Collection.extend({
         model: App.Models.QuestionButton
     });
-
     App.Views.QuestionButtons = Backbone.View.extend({
         el: '#question-buttons-container',        
         render: function() {
@@ -202,25 +145,92 @@
             this.$el.append( questionButtonView.render().el );
         }
     });
-    var questionButtonCollection = new App.Collections.QuestionButtons([
-        {
-            title: '111',
-            id: 1
-        },
-        {
-            title: '222',
-            id: 2
-        },
-        {
-            title: '333',
-            id: 3
-        }
-    ]);
-    var questionButtonsView = new App.Views.QuestionButtons({
-        collection: questionButtonCollection        
-    });
-    questionButtonsView.render();
 
+    App.Views.Main = Backbone.View.extend({
+        el: '#app-container',
+        render: function() {
+            var topicsCollection = new App.Collections.Topics([
+                {
+                    title: 'Computer Awareness',
+                    id: 1
+                },
+                {
+                    title: 'English',
+                    id: 2
+                },
+                {
+                    title: 'General Awareness',
+                    id: 3
+                }
+            ]);
+            var topicsView = new App.Views.Topics({
+                collection: topicsCollection
+            });
+            topicsView.render();
+
+            // Questions
+            var questionsCollection = new App.Collections.Questions([
+                {
+                    id: 2,
+                    title: 'This is the second question title',
+                    option_1: 'socond que Option number 1',
+                    option_2: 'socond que Option number 2',
+                    option_3: 'socond que Option number 3',
+                    option_4: 'socond que Option number 4',
+                    option_5: 'socond que Option number 5'
+                },
+                {
+                    id: 3,
+                    title: 'This is the question title',
+                    option_1: 'Third question Option number 1',
+                    option_2: 'Third question Option number 2',
+                    option_3: 'Third question Option number 3',
+                    option_4: 'Third question Option number 4',
+                    option_5: 'Third question Option number 5'
+                },
+                {
+                    id: 1,
+                    title: 'This is the question title',
+                    option_1: 'first Option number 1',
+                    option_2: 'first Option number 2',
+                    option_3: 'first Option number 3',
+                    option_4: 'first Option number 4',
+                    option_5: 'first Option number 5'
+                }
+            ]);
+
+            var questionsView = new App.Views.Questions({
+                collection: questionsCollection
+            });
+            questionsView.render();
+
+            // Question Buttons
+            var questionButtonCollection = new App.Collections.QuestionButtons([
+                {
+                    title: '111',
+                    id: 1
+                },
+                {
+                    title: '222',
+                    id: 2
+                },
+                {
+                    title: '333',
+                    id: 3
+                }
+            ]);
+            var questionButtonsView = new App.Views.QuestionButtons({
+                collection: questionButtonCollection        
+            });
+            questionButtonsView.render();
+
+            // Do all the code here
+            console.log('render works');
+        }
+    });
+
+    var myExamPreparation = new App.Views.Main;
+    myExamPreparation.render();
 
 
 })();
