@@ -38,16 +38,14 @@ class TestsController extends AppController
     public function admin_preview($id = null)
     {
         // Get all questions grouped by section
-        $this->Test->id = $id;
-        $conditions = array("Question.id IN (SELECT question_id FROM questions_tests WHERE test_id='$id')");
-        $group = array('Question.subject_id');
-        $recursive = -1;
-        $questions  = $this->Test->Question->find(
-            'all',
-            compact('conditions', 'recursive')
-        );
-        //debug($questions);
-        $this->render('admin_preview_test');
+        $this->_startTest($id);
+
+        $questions = $this->_getTestQuestions($id);
+        $subjects  = $this->_getTestSubjects($id);
+        
+        $this->set(compact('subjects', 'questions'));
+     
+        $this->render('mep');
     }
 
 
@@ -736,33 +734,71 @@ class TestsController extends AppController
     }
 
 
-    public function submit($type = null)
+    public function submit($type = null, $extra = null)
     {
         // Check if test is valid
         $success    = false;
         $error      = false;
+        $active     = false;
         $message    = '';
+        $data       = null;
         $statusCode = 200;
+        $testId     = 0;
 
-        if (empty($type) || !$this->request->isPost() || !$this->request->isAjax()) {
+        if (empty($type)) {
             $error      = true;
-            //$statusCode = 405;
-            //$message    = 'Method Not Allowed';
+            $statusCode = 405;
+            $message    = 'Method Not Allowed';
         }
 
-        if ($this->request->isPost() || $this->request->isAjax()) {
-            //debug($this->request->data);
+        // Checks if test is active or not
+        if ($testId = $this->_getActiveTestId() ) {
+            $active = true;
+        } else {
+            $error = true;
+            $message = 'Test is not active anymore';
+        }
+
+        if (!$error) {
+            // Sends test topic
+            if ($this->request->isGet() && $type == 'get_subjects') {
+                $data = $this->_getTestSubjects($testId);
+                return $this->_sendJson($data);
+            }
+
+            // Gets the first question of the subject
+            if ($this->request->isGet() && $type == 'set_subject' && isset($extra)) {
+                $data = $this->_getTestQuestions($testId, $extra);
+                return $this->_sendJson($data);
+            }
+
+            // Gets the quesiton Id
+            if ($this->request->isGet() && $type == 'set_question' && isset($extra)) {
+                $data = $this->_getTestQuestions($testId, null, $extra);
+                return $this->_sendJson($data);
+            }
+
+            if ($this->request->isGet() && $type == 'mark_question' && isset($extra)) {
+                //$this->_markQuestionForReview();
+                $data = $this->_getTestQuestions($testId, null, $extra);
+                return $this->_sendJson($data);
+            }
+
+            if ($this->request->isGet() && $type == 'get_questions') {
+                $data = $this->_getTestQuestions($testId);
+                return $this->_sendJson($data);
+            }
+
             $success = true;
             $message = 'Okay, getting ajax request';
         }
 
-        $responseData = compact('success', 'error', 'message', 'type');
+        $responseData = compact('success', 'error', 'message', 'type', 'data');
 
         $this->autoLayout = false;
         $this->render(false);
         return $this->_sendJson($responseData, $statusCode);
     }
-
 
     private function _sendJson($data, $statusCode = 200)
     {
@@ -776,16 +812,127 @@ class TestsController extends AppController
     private function _startTest($testId = null)
     {
         // Set session variable to start the test
+        $questions = $this->_getTestQuestions($testId);
+        $subjects  = $this->_getTestSubjects($testId);
+        $stats     = array(
+            'testId' => $testId
+        );
+
+        $this->Session->delete('liveTest');
+        $this->Session->write('liveTest', compact('questions', 'subjects', 'stats'));
     }
 
-    private function _getTestTopics($idOrSlug = null)
+    private function _endTest($testId = null)
+    {
+        // Save test data
+
+        // Delete session variable to end the test
+        $this->Session->delete('liveTest');
+    }
+
+    public function _getActiveTestId()
+    {
+        if ($this->Session->check('liveTest.stats.testId')) {
+            return $this->Session->read('liveTest.stats.testId');
+        }
+
+        return false;
+        //return 26;
+    }
+
+    private function _getTestSubjects($id = null)
     {
         // Gets the list of topics
+        $query = 
+            'SELECT `Subject`.`id`, `Subject`.`name`
+                FROM  `subjects` AS `Subject`
+                WHERE `Subject`.`id`
+                    IN (
+                        SELECT DISTINCT (`Question`.`subject_id`)
+                        FROM `questions` AS `Question`
+                        WHERE `Question`.`id`
+                        IN (
+                            SELECT `QuestionsTest`.`question_id`
+                            FROM `questions_tests` AS `QuestionsTest`
+                            WHERE `QuestionsTest`.`test_id` ='.$id.'
+                        )
+                    )';
+
+        $subjects = $this->Test->query($query);
+
+        return $subjects;        
+    }
+
+
+    private function _getTestQuestions($testId = null, $subjectId = null, $questionIndex = null)
+    {
+        // If already got the questions, send them taking them from session
+        if ( $this->Session->check('liveTest') ) {
+
+            $questions = $this->Session->read('liveTest.questions');
+
+            if (isset($subjectId) && is_numeric($subjectId)) {
+                foreach ($questions as $key => $question) {
+                    if ($question['Question']['subject_id'] == $subjectId) {
+                        $question['nextQuestionIndex'] = !empty($questions[$key + 1]) ? $key + 1 : 0;
+                        return $question;
+                    }
+                }
+            }
+
+            if (isset($questionIndex) && is_numeric($questionIndex)) {
+                $question                      = $questions[$questionIndex];
+                $question['viewed']            = true;
+                $question['nextQuestionIndex'] = 
+                    !empty($questions[$questionIndex + 1]) ? $questionIndex + 1 : 0; 
+
+                return $question;                
+            }
+
+            foreach ($questions as $key => $question) {
+                $questions[$key]['index'] = $key + 1;
+                $questions[$key]['nextQuestionIndex'] = !empty($questions[$key + 1]) ? $key + 1 : 0;
+                $questions[$key]['viewed'] = false;
+                $questions[$key]['answer'] = false;
+                $questions[$key]['review'] = false;
+            }
+
+            return $questions;
+        }
+
+        $query = "Question.id IN (SELECT question_id FROM questions_tests WHERE test_id = $testId)";
+
+        if (!empty($subjectId)) {
+            $query .= " AND Question.subject_id='$subjectId'";
+        }
+
+        if (!empty($questionId)) {
+            $query .= " AND Question.id = '$questionId'";
+        }
+
+        $conditions = array($query);
+        $contain    = array('Subject', 'Image');
+
+        $questions = $this->Test->Question->find('all', compact('conditions', 'contain'));
+
+        return $questions;
+    }
+
+    public function _getTestSubjectQuestion($testId, $subjectId, $index)
+    {
+        $questions = $this->_getTestQuestions($testId, $subjectId);
+
+        if (!empty($questions[$index])) {
+            $question = $questions[$index];
+            return $question;
+        }
+
+        return array();
     }
 
     private function _saveTestQuestionAnswer($questionId, $answer)
     {
-        // saves the answer in result
+        
     }
 
 

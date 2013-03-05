@@ -39,3 +39,10 @@ form .text-error {
     width: 25px;
     margin: 3px;
 }
+
+#questions li {
+	line-height: 25px;
+}
+label {
+	display: inline-block;
+}

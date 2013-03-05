@@ -37,6 +37,8 @@
     Router::connect('/admin/users/:action/*', array('plugin' => 'users', 'controller' => 'users', 'admin' => true));
     Router::connect('/admin/users/users/:action/*', array('plugin' => 'users', 'controller' => 'users', 'admin' => true));
 
+    //Router::connect('/submit/*', array('plugin' => false, 'controller' => 'tests', 'action' => 'submit', 'admin' => false));
+
 
 /**
  * ...and connect the rest of 'Pages' controller's urls.

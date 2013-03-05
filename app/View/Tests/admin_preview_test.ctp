@@ -1,18 +1,17 @@
-<?php 
-echo $this->Html->script(array('underscore-min', 'backbone', 'admin_preview'), array('inline' => false));
- ?>
+<?php //echo $this->Html->script(array('underscore-min', 'backbone', 'backbone-relational', 'admin_preview'), array('inline' => false));?>
+<?php echo $this->Html->script(array('jquery.mustache','mustache', 'mep'), array('inline' => false));?>
 <script type="text/template" id="topicTemplate">
-    <a href="#" class="btn btn-primary"><%= title %></a>
+    <a href="#" class="btn btn-primary"><%= name %></a>
 </script>
 <script type="text/template" id="questionTemplate">
-    <h4>Question No. <%= id %></h4>
-    <div class="question-title"><%= title %></div>
+    <h4>Question No. <%= Question.id %></h4>
+    <div class="question-title"><%= Question.title %></div>
     <ul class="unstyled options-container">
-        <li><input type="radio"><%= option_1 %></li>
-        <li><input type="radio"><%= option_2 %></li>
-        <li><input type="radio"><%= option_3 %></li>
-        <li><input type="radio"><%= option_4 %></li>
-        <li><input type="radio"><%= option_5 %></li>
+        <li><input type="radio"><%= Question.option_1 %></li>
+        <li><input type="radio"><%= Question.option_2 %></li>
+        <li><input type="radio"><%= Question.option_3 %></li>
+        <li><input type="radio"><%= Question.option_4 %></li>
+        <li><input type="radio"><%= Question.option_5 %></li>
     </ul>
     <div>
         <div class="pull-left">
@@ -25,7 +24,7 @@ echo $this->Html->script(array('underscore-min', 'backbone', 'admin_preview'), a
     </div>
 </script>
 <script id="questionButtonTemplate" type="text/template">
-    <a href="#" data-question-id="<%= title %>" class="btn answerbtn"><%= title %></a>
+    <a href="#" data-question-id="<%= Question.id %>" class="btn answerbtn"><%= Question.id %></a>
 </script>
 <div class="topic-data hide">
     <ul class="unstyled">
@@ -45,6 +44,7 @@ echo $this->Html->script(array('underscore-min', 'backbone', 'admin_preview'), a
     </div>
     <div class="span3">
         <div class="row">
+            <div class="span3"><a class="start-test btn btn-large btn-danger">Start Test</a></div>
             <div class="span1" style="background:blue;height:70px;">&nbsp;</div>
             <div class="span2">
                 <h4>User Name</h4>

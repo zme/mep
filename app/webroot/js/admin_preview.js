@@ -38,6 +38,9 @@
         }
     });
     App.Collections.Topics = Backbone.Collection.extend({
+        initialize: function() {
+          this.on('change', this.render, this);  
+        },
         model: App.Models.Topic,
     });
     App.Views.Topics = Backbone.View.extend({
@@ -50,8 +53,8 @@
             var topicView = new App.Views.Topic({model: topic});
             this.$el.append( topicView.render().el );
         }
-    });   
-    
+    });
+
 
     /**
      * QUESTIONS
@@ -59,10 +62,11 @@
     App.Models.Question = Backbone.Model.extend({});
     App.Views.Question  = Backbone.View.extend({
         tagName: 'div',
-        template: template('questionTemplate'),        
+        template: template('questionTemplate'),
         initialize: function() {
+            this.model.set('indexId', this.model.collection.indexOf(this.model));
             this.model.on('change', this.render, this);
-        },        
+        },
         render: function() {
             var template = this.template(this.model.toJSON());
             this.$el.html(template);
@@ -84,9 +88,9 @@
         setQuestion: function(model) {
             this.currentQuestion = model;
         }
-    });    
+    });
     App.Views.Questions = Backbone.View.extend({
-        el: '#questions',        
+        el: '#questions',
         render: function() {
             var currentQuestion     = this.getQuestion();
             var currentQuestionView = new App.Views.Question({model: currentQuestion});
@@ -102,7 +106,7 @@
         },
         initialize: function() {
             this.setQuestion(this.collection.at(0));                
-            this.collection.on('change:currentQuestion', this.render, this);
+            this.collection.on('change', this.render, this);
         },
         getQuestion: function() {
             return this.collection.currentQuestion;
@@ -119,20 +123,29 @@
     App.Models.QuestionButton = Backbone.Model.extend({});
     App.Views.QuestionButton = Backbone.View.extend({
         tagName: 'span',
+        events: {
+            'click a' : 'selectQuestion'
+        },
+        selectQuestion: function(event) {
+            var indexId = this.model.get('cid');
+            //console.log(this.model.cid);
+            //console.log(indexId);
+            this.model.collection.setQuestion(this.model);
+        },
         template: template('questionButtonTemplate'),        
         initialize: function() {
-            //console.log(this.model.attributes);
+            this.model.set('indexId', this.model.collection.indexOf(this.model));
             this.model.on('change', this.render, this);
         },        
-        render: function() {
+        render: function() {            
             var template = this.template(this.model.toJSON());
             this.$el.html(template);
             return this;
         }
     });
-    App.Collections.QuestionButtons = Backbone.Collection.extend({
+    /*App.Collections.QuestionButtons = Backbone.Collection.extend({
         model: App.Models.QuestionButton
-    });
+    });*/
     App.Views.QuestionButtons = Backbone.View.extend({
         el: '#question-buttons-container',        
         render: function() {
@@ -146,91 +159,68 @@
         }
     });
 
+    //
+    // Main app
+    //
     App.Views.Main = Backbone.View.extend({
         el: '#app-container',
+        events: {
+            'click .start-test' : 'beginTest'
+        },
+        beginTest: function(event) {
+            this.initializeTopics();
+            this.initializeQuestions();
+            //this.initializeQuestionButtons();
+            
+            $(event.currentTarget).hide();
+        },
+        initializeTopics: function() {
+            var topicsCollection = new App.Collections.Topics;
+            topicsCollection.url = '/tests/submit/get_topics';
+            
+            topicsCollection.fetch({
+                reset: true,
+                success: function (response) {
+                    var topicsView = new App.Views.Topics({
+                        collection: topicsCollection
+                    });
+                    topicsView.render();
+                },
+                error: function (response) {
+                    console.log(response);
+                }
+            });
+        },
+        initializeQuestions: function() {
+            var questionsCollection = new App.Collections.Questions;
+            questionsCollection.url = '/tests/submit/get_questions';
+            
+            questionsCollection.fetch({
+                reset: true,
+                success: function (response) {
+                    var questionsView = new App.Views.Questions({
+                        collection: questionsCollection
+                    });
+                    questionsView.render();
+                    
+                    // Create buttons for the same collection
+                    var questionButtonsView = new App.Views.QuestionButtons({
+                        collection: questionsCollection        
+                    });
+                    questionButtonsView.render();
+
+                },
+                error: function (response) {
+                    console.log(response);
+                }
+            });
+        },
         render: function() {
-            var topicsCollection = new App.Collections.Topics([
-                {
-                    title: 'Computer Awareness',
-                    id: 1
-                },
-                {
-                    title: 'English',
-                    id: 2
-                },
-                {
-                    title: 'General Awareness',
-                    id: 3
-                }
-            ]);
-            var topicsView = new App.Views.Topics({
-                collection: topicsCollection
-            });
-            topicsView.render();
 
-            // Questions
-            var questionsCollection = new App.Collections.Questions([
-                {
-                    id: 2,
-                    title: 'This is the second question title',
-                    option_1: 'socond que Option number 1',
-                    option_2: 'socond que Option number 2',
-                    option_3: 'socond que Option number 3',
-                    option_4: 'socond que Option number 4',
-                    option_5: 'socond que Option number 5'
-                },
-                {
-                    id: 3,
-                    title: 'This is the question title',
-                    option_1: 'Third question Option number 1',
-                    option_2: 'Third question Option number 2',
-                    option_3: 'Third question Option number 3',
-                    option_4: 'Third question Option number 4',
-                    option_5: 'Third question Option number 5'
-                },
-                {
-                    id: 1,
-                    title: 'This is the question title',
-                    option_1: 'first Option number 1',
-                    option_2: 'first Option number 2',
-                    option_3: 'first Option number 3',
-                    option_4: 'first Option number 4',
-                    option_5: 'first Option number 5'
-                }
-            ]);
-
-            var questionsView = new App.Views.Questions({
-                collection: questionsCollection
-            });
-            questionsView.render();
-
-            // Question Buttons
-            var questionButtonCollection = new App.Collections.QuestionButtons([
-                {
-                    title: '111',
-                    id: 1
-                },
-                {
-                    title: '222',
-                    id: 2
-                },
-                {
-                    title: '333',
-                    id: 3
-                }
-            ]);
-            var questionButtonsView = new App.Views.QuestionButtons({
-                collection: questionButtonCollection        
-            });
-            questionButtonsView.render();
-
-            // Do all the code here
-            console.log('render works');
         }
     });
 
     var myExamPreparation = new App.Views.Main;
     myExamPreparation.render();
-
 
 })();

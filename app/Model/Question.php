@@ -22,7 +22,7 @@ class Question extends AppModel
      *
      * @var array
      */
-    public $belongsTo = array('Topic');
+    public $belongsTo = array('Topic', 'Subject');
 
     public $hasMany = array('Image');
 
